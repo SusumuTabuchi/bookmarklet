@@ -1,0 +1,75 @@
+const ATRS = [
+    {
+        "name": "siteA",
+        "id": "siteasid",
+        "pass": "siteaspass",
+        "url": "https://sitea.com/login",
+        "ELEMENT_SELECTORS": {
+            "ids": "#A_siteID",
+            "passs": "#A_sitePASS",
+            "submits": "#id_passlogin"
+        },
+        "has_reCAPTCHA": false
+    },
+    {
+        "name": "siteB",
+        "id": "sitebsid",
+        "pass": "sitebspass",
+        "url": "https://siteb.co.jp/login",
+        "ELEMENT_SELECTORS": {
+            "ids": "#B_siteID",
+            "passs": "#B_sitePASS",
+            "submits": "#id_passlogin"
+        },
+        "has_reCAPTCHA": false
+    }
+];
+
+const getLocation = () => {
+    let result = {
+        "href": null,
+        "origin": null,
+        "domain": null,
+        "path": null,
+        "params": null
+    };
+    let url = new URL(window.location.href);
+    result.href = url.href;
+    result.origin = url.origin;
+    result.domain = url.host;
+    result.path = url.pathname;
+    result.params = url.search.slice(1).split("&").map(val => {return  val.split("=")});
+    return result;
+}
+const getSiteValue = (current_url) => {
+    /* Return Object or undefind*/
+    return ATRS.find((val) => ~current_url.indexOf(val.url));
+    /* [~]は数値をビット反転する演算子であり、「indexOf()でマッチしなかったとき返ってくる数値」である**-1をビット反転した数値は0になる。 */
+}
+const logIn = (attrs) => {
+    let element_id = document.querySelector(attrs.ELEMENT_SELECTORS.ids);
+    let element_pass = document.querySelector(attrs.ELEMENT_SELECTORS.passs);
+    let element_submits = document.querySelector(attrs.ELEMENT_SELECTORS.submits);
+
+    element_id.value = attrs.id;
+    element_id.dispatchEvent(new Event("input", {
+        bubbles: false,
+        cancelable: true
+    }));
+    element_pass.value = attrs.pass;
+    element_pass.dispatchEvent(new Event("input", {
+        bubbles: false,
+        cancelable: true
+    }));
+    element_submits.click();
+}
+
+/* main section */
+var url = getLocation();
+var attrs = getSiteValue(url.href);
+if(attrs){
+    console.log("site: " + attrs.name);
+    logIn(attrs);
+}else{
+    console.log("this site is not exists.");
+}
